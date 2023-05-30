@@ -9,9 +9,6 @@
 			"include": "#strings"
 		},
 		{
-			"include": "#functions"
-		},
-		{
 			"include": "#constants"
 		},
 		{
@@ -22,6 +19,12 @@
 		},
 		{
 			"include": "#types"
+		},
+		{
+			"include": "#operators"
+		},
+		{
+			"include": "#defaultLibrary"
 		}
 	],
 	"repository": {
@@ -50,14 +53,7 @@
 				}
 			]
 		},
-		"functions": {
-			"patterns": [
-				{
-					"name": "support.function.oberon",
-					"match": "\\b(ABS|ASR|CHR|FLT|INC|LSL|NEW|ROR|ASSERT|DEC|EXCL|FLOOR|INCL|LEN|ODD|ORD|PACK|UNPK|Out)\\b"
-				}
-			]
-		},
+		
 		"constants": {
 			"patterns": [
 				{
@@ -92,18 +88,27 @@
 				}
 			]
 		},
+		"defaultLibrary":{
+			"patterns": [
+				{
+					"name": "support.type.oberon",
+					"match": "\\b(CHAR|REAL|BYTE|INTEGER|SET|BOOLEAN)\\b"
+				},
+				{
+					"name": "support.function.oberon",
+					"match": "\\b(ABS|ASR|CHR|FLT|INC|LSL|NEW|ROR|ASSERT|DEC|EXCL|FLOOR|INCL|LEN|ODD|ORD|PACK|UNPK|Out)\\b"
+				}
+			]
+		},
 		"types":{
 			"patterns": [
 				{
-					"name": "entity.name.type",
+					"name": "entity.name.type.oberon",
 					"match": "\\b(String|Int|Ln)\\b"
-				},
-				{
-					"name": "support.type",
-					"match": "\\b(CHAR|REAL|BYTE|INTEGER|SET|BOOLEAN)\\b"
 				}
 			]
 		}
 	},
+	
 	"scopeName": "source.oberon"
 }
