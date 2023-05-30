@@ -1,0 +1,25 @@
+{
+  "name": "oberon",
+  "displayName": "oberon",
+  "description": "Oberon syntax highlight and auto complete.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.78.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "oberon",
+      "aliases": ["Oberon", "oberon"],
+      "extensions": [".oberon"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "oberon",
+      "scopeName": "source.oberon",
+      "path": "./syntaxes/oberon.tmLanguage.json"
+    }]
+  }
+}
