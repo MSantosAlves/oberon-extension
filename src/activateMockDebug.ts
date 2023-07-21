@@ -75,15 +75,6 @@ export function activateMockDebug(
     )
   );
 
-  context.subscriptions.push(
-    vscode.commands.registerCommand(
-      "extension.oberon-language-server.getProgramName",
-      (config) => {
-        return "main.oberon";
-      }
-    )
-  );
-
   // register a configuration provider for 'mock' debug type
   const provider = new MockConfigurationProvider();
   context.subscriptions.push(

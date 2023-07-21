@@ -21,6 +21,7 @@ import { randomBytes } from "crypto";
 import { tmpdir } from "os";
 import { join } from "path";
 import { platform } from "process";
+import { exec } from "child_process";
 import { ProviderResult } from "vscode";
 import { MockDebugSession } from "./mockDebug";
 import { activateMockDebug, workspaceFileAccessor } from "./activateMockDebug";
@@ -88,17 +89,72 @@ export function activate(context: vscode.ExtensionContext) {
     },
   });
 
-  context.subscriptions.push(complete);
+  async function runCommandInDebugConsole(command: string) {
+    const debugConsole = vscode.debug.activeDebugConsole;
+    if (debugConsole) {
+      debugConsole.appendLine(command);
+    }
+  }
+
+  let repl = vscode.commands.registerCommand(
+    "extension.oberon-language-server.repl",
+    () => {
+      const dllPath = vscode.extensions.getExtension(
+        context.extension.id
+      )?.extensionPath;
+      const commandToExecute = `java -jar ${dllPath}/oberon-lang-assembly-0.1.1.jar repl -i ${vscode.workspace.rootPath}/main.oberon`; // Comando que você deseja executar
+      const response = exec(commandToExecute, (error, stdout, stderr) => {
+        if (error !== null) {
+          // console.log(`Error: ${error}`);
+        }
+      });
+      // console.log("response", response);
+      console.warn("response", response.stdout);
+      // Quando o comando terminar, você pode escolher como deseja manipular a saída.
+      // terminal.dispose(() => {
+      //   // Você pode fazer algo com o resultado, como exibi-lo no console de depuração.
+      //   const result = 'Hello, World!'; // Para este exemplo, consideramos que o resultado é 'Hello, World!'
+
+      //   // Exibindo o resultado no console de depuração
+      //   vscode.debug.activeDebugConsole.appendLine(`Resultado: ${result}`);
+      // });
+    }
+  );
+
+  let typeCheck = vscode.commands.registerCommand(
+    "extension.oberon-language-server.typeCheck",
+    () => {
+      const dllPath = vscode.extensions.getExtension(
+        context.extension.id
+      )?.extensionPath;
+      const commandToExecute = `java -jar ${dllPath}/oberon-lang-assembly-0.1.1.jar typeChecker -i ${vscode.workspace.rootPath}/main.oberon`; // Comando que você deseja executar
+      const response = exec(commandToExecute, (error, stdout, stderr) => {
+        if (error !== null) {
+          // console.log(`Error: ${error}`);
+          runCommandInDebugConsole("response.stdout");
+        } else {
+          runCommandInDebugConsole("response.stdout");
+        }
+      });
+    }
+  );
+
+  context.subscriptions.push(complete, repl, typeCheck);
 
   switch (runMode) {
     case "server":
-      activateMockDebug(context, new MockDebugAdapterServerDescriptorFactory());
+      activateMockDebug(
+        context,
+        new MockDebugAdapterServerDescriptorFactory(context.extension.id)
+      );
       break;
 
     case "namedPipeServer":
       activateMockDebug(
         context,
-        new MockDebugAdapterNamedPipeServerDescriptorFactory()
+        new MockDebugAdapterNamedPipeServerDescriptorFactory(
+          context.extension.id
+        )
       );
       break;
 
@@ -140,6 +196,7 @@ class MockDebugAdapterServerDescriptorFactory
   implements vscode.DebugAdapterDescriptorFactory
 {
   private server?: Net.Server;
+  constructor(private readonly id: string) {}
 
   createDebugAdapterDescriptor(
     session: vscode.DebugSession,
@@ -147,7 +204,7 @@ class MockDebugAdapterServerDescriptorFactory
   ): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
     if (!this.server) {
       this.server = Net.createServer((socket) => {
-        const session = new MockDebugSession(workspaceFileAccessor);
+        const session = new MockDebugSession(workspaceFileAccessor, this.id);
         session.setRunAsServer(true);
         session.start(socket as NodeJS.ReadableStream, socket);
       }).listen(0);
@@ -169,6 +226,7 @@ class MockDebugAdapterNamedPipeServerDescriptorFactory
   implements vscode.DebugAdapterDescriptorFactory
 {
   private server?: Net.Server;
+  constructor(private readonly id: string) {}
 
   createDebugAdapterDescriptor(
     session: vscode.DebugSession,
@@ -180,7 +238,6 @@ class MockDebugAdapterNamedPipeServerDescriptorFactory
         platform === "win32"
           ? join("\\\\.\\pipe\\", pipeName)
           : join(tmpdir(), pipeName);
-
       this.server = Net.createServer((socket) => {
         const session = new MockDebugSession(workspaceFileAccessor);
         session.setRunAsServer(true);

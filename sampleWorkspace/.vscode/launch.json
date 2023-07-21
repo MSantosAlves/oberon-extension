@@ -5,7 +5,7 @@
       "type": "mock",
       "request": "launch",
       "name": "Debug Oberon",
-      "program": "${workspaceFolder}/${command:AskForProgramName}",
+      "program": "${workspaceFolder}/main.oberon",
       "stopOnEntry": true,
       "trace": false
     },
@@ -13,7 +13,7 @@
       "type": "mock",
       "request": "attach",
       "name": "Attach Oberon",
-      "program": "${workspaceFolder}/${command:AskForProgramName}",
+      "program": "${workspaceFolder}/main.oberon",
       "stopOnEntry": true,
       "trace": false
     }

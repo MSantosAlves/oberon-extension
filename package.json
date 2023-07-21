@@ -1,4 +1,5 @@
 {
+  "id": "oberon-language-server",
   "name": "oberon-language-server",
   "displayName": "Oberon Language Server",
   "description": "",
@@ -10,7 +11,10 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onCommand:extension.oberon-language-server.repl",
+    "onCommand:extension.oberon-language-server.typeCheck"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
@@ -31,6 +35,14 @@
       {
         "command": "extension.oberon-language-server.toggleFormatting",
         "title": "Toggle between decimal and hex formatting"
+      },
+      {
+        "command": "extension.oberon-language-server.repl",
+        "title": "Executar REPL"
+      },
+      {
+        "command": "extension.oberon-language-server.typeCheck",
+        "title": "Executar Type Check"
       }
     ],
     "languages": [
