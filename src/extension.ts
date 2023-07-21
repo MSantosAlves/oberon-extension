@@ -89,57 +89,73 @@ export function activate(context: vscode.ExtensionContext) {
     },
   });
 
-  async function runCommandInDebugConsole(command: string) {
-    const debugConsole = vscode.debug.activeDebugConsole;
-    if (debugConsole) {
-      debugConsole.appendLine(command);
-    }
-  }
-
   let repl = vscode.commands.registerCommand(
     "extension.oberon-language-server.repl",
     () => {
+      const terminalName = "Oberon REPL";
+      const terminal =
+        vscode.window.terminals.find((term) => term.name === terminalName) ??
+        vscode.window.createTerminal(terminalName);
+      terminal.show();
+
       const dllPath = vscode.extensions.getExtension(
         context.extension.id
       )?.extensionPath;
-      const commandToExecute = `java -jar ${dllPath}/oberon-lang-assembly-0.1.1.jar repl -i ${vscode.workspace.rootPath}/main.oberon`; // Comando que você deseja executar
-      const response = exec(commandToExecute, (error, stdout, stderr) => {
-        if (error !== null) {
-          // console.log(`Error: ${error}`);
-        }
-      });
-      // console.log("response", response);
-      console.warn("response", response.stdout);
-      // Quando o comando terminar, você pode escolher como deseja manipular a saída.
-      // terminal.dispose(() => {
-      //   // Você pode fazer algo com o resultado, como exibi-lo no console de depuração.
-      //   const result = 'Hello, World!'; // Para este exemplo, consideramos que o resultado é 'Hello, World!'
+      const commandToExecute = `java -jar ${dllPath}/oberon-lang-assembly-0.1.1.jar repl`;
 
-      //   // Exibindo o resultado no console de depuração
-      //   vscode.debug.activeDebugConsole.appendLine(`Resultado: ${result}`);
-      // });
+      terminal.sendText(commandToExecute);
+    }
+  );
+
+  let typeChecker = vscode.commands.registerCommand(
+    "extension.oberon-language-server.typeChecker",
+    () => {
+      if (vscode.debug.activeDebugSession) {
+        vscode.commands.executeCommand(
+          "extension.oberon-language-server.typeCheck"
+        );
+      } else {
+        vscode.window.showErrorMessage(
+          "É necessário estar executando o 'Debug Oberon' para executar esse comando."
+        );
+      }
     }
   );
 
   let typeCheck = vscode.commands.registerCommand(
     "extension.oberon-language-server.typeCheck",
     () => {
+      const debugConsole = vscode.debug.activeDebugConsole;
+
       const dllPath = vscode.extensions.getExtension(
         context.extension.id
       )?.extensionPath;
-      const commandToExecute = `java -jar ${dllPath}/oberon-lang-assembly-0.1.1.jar typeChecker -i ${vscode.workspace.rootPath}/main.oberon`; // Comando que você deseja executar
-      const response = exec(commandToExecute, (error, stdout, stderr) => {
+      const commandToExecute = `java -jar ${dllPath}/oberon-lang-assembly-0.1.1.jar typeChecker -i ${vscode.workspace.rootPath}/main.oberon`;
+
+      exec(commandToExecute, (error, stdout, stderr) => {
         if (error !== null) {
-          // console.log(`Error: ${error}`);
-          runCommandInDebugConsole("response.stdout");
+          console.log(`Error: ${error}`);
+          debugConsole.appendLine(`${error}`);
         } else {
-          runCommandInDebugConsole("response.stdout");
+          console.log("stdout", stdout);
+          debugConsole.appendLine(stdout);
         }
       });
     }
   );
 
-  context.subscriptions.push(complete, repl, typeCheck);
+  vscode.workspace.onDidSaveTextDocument((event) => {
+    const launchConfiguration = vscode.workspace.getConfiguration("launch");
+    const fileName = launchConfiguration.configurations[0].program;
+
+    if (fileName.split("/").pop() === event.fileName.split("/").pop()) {
+      vscode.commands.executeCommand(
+        "extension.oberon-language-server.typeCheck"
+      );
+    }
+  });
+
+  context.subscriptions.push(complete, repl, typeCheck, typeChecker);
 
   switch (runMode) {
     case "server":

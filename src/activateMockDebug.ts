@@ -27,7 +27,6 @@ export function activateMockDebug(
       "extension.oberon-language-server.runEditorContents",
       (resource: vscode.Uri) => {
         let targetResource = resource;
-        console.log("entrou??", targetResource);
         if (!targetResource && vscode.window.activeTextEditor) {
           targetResource = vscode.window.activeTextEditor.document.uri;
         }
@@ -48,7 +47,6 @@ export function activateMockDebug(
     vscode.commands.registerCommand(
       "extension.oberon-language-server.debugEditorContents",
       (resource: vscode.Uri) => {
-        console.log("aqq??");
         let targetResource = resource;
         if (!targetResource && vscode.window.activeTextEditor) {
           targetResource = vscode.window.activeTextEditor.document.uri;
